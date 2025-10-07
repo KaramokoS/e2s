@@ -2,13 +2,16 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+
 ApplicationWindow {
     width: 1200
     height: 800
     visible: true
     title: "Stitch Design - Dashboard"
+    property var colors: Qt.createComponent("Colors.qml").createObject(this)
+
     background: Rectangle {
-        color: "#f8f8ffdc"
+        color: Colors.backgroundColor
     }
 
     RowLayout {

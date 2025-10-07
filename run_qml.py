@@ -12,7 +12,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     engine = QQmlApplicationEngine()
-    engine.load("window.qml")
+    qml_file = os.path.join(os.path.dirname(__file__), "window.qml")
+    engine.load(qml_file)
 
     if not engine.rootObjects():
         sys.exit(-1)
