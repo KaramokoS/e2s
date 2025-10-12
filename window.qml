@@ -27,50 +27,93 @@ ApplicationWindow {
             border.color: "#ddd"
 
             ColumnLayout {
-                 anchors.fill: parent
-                spacing: 30
+                anchors.fill: parent
+                spacing: 10
                 anchors.margins: 20  // internal padding
                 Rectangle {
-                    color: "white"
-                    Layout.fillHeight: true
+                    id : _doctor
+                    color: "red"
                     Layout.preferredWidth: parent.width
+                    Layout.preferredHeight: 0.1*parent.height
                     Layout.topMargin: 10
                     RowLayout {
-                        anchors.fill: parent
                         anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        Layout.alignment: Qt.AlignTop
                         spacing: 12
                         Image {
                             source: "https://lh3.googleusercontent.com/aida-public/AB6AXuB5jpKyTOFH9WTCPVlYzEc1TW5A7EorQBwVdxm8I9VVQ7wYC1puqKTykR5MPVQimhN_zDC29Ee8jJPfzD7n7az2HleobNiNDK_6J48D9SA-W22y6KMReLsEZFCpKfyw77sBKavJvvTYqxnYa1vkZO26_NewZOMNQ4NYixlpCRXgE0ReQfk-LdT70DqscdP9LUwGiEfZboeNJOdezivL_4gaBcFTgLot1eATQ4BBgKFcujRI6ggTGoEmj0WnhbuWEYdqYbG6FqBIr4FC"
                             fillMode: Image.PreserveAspectFit
                             Layout.preferredWidth: 0.4*parent.width
                             Layout.preferredHeight: parent.height
+                            Layout.alignment: Qt.AlignTop
                         }
                         ColumnLayout {
                             spacing: 10
                             Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignTop
 
                             Text {
                                 text: "Dr. Emily Carter"
                                 font.bold: true
                                 font.pixelSize: 16
                                 color: "#222"
-                                Layout.alignment: Qt.AlignVCenter
                             }
 
                             Text {
                                 text: "emily@doctor.com"
                                 font.pixelSize: 16
                                 color: "#555"
-                                Layout.alignment: Qt.AlignVCenter
                             }
                         }
                     }
                 }
                 Rectangle {
-                    color: "white"
+                    color: "green"
                     Layout.fillHeight: true
                     Layout.preferredWidth: parent.width
                     Layout.topMargin: 10
+                    ColumnLayout {
+                        anchors.centerIn: parent
+                        spacing: 20
+
+                        Button {
+                            text: "Patients"
+                            font.bold: true
+                            Layout.preferredWidth: 150
+                            Layout.preferredHeight: 40
+                            background: Rectangle {
+                                color: "#ffffff"
+                                radius: 8
+                                border.color: "#dddddd"
+                            }
+                        }
+
+                        Button {
+                            text: "Hospitalisation"
+                            font.bold: true
+                            Layout.preferredWidth: 150
+                            Layout.preferredHeight: 40
+                            background: Rectangle {
+                                color: "#ffffff"
+                                radius: 8
+                                border.color: "#dddddd"
+                            }
+                        }
+
+                        Button {
+                            text: "Calendrier"
+                            font.bold: true
+                            Layout.preferredWidth: 150
+                            Layout.preferredHeight: 40
+                            background: Rectangle {
+                                color: "#ffffff"
+                                radius: 8
+                                border.color: "#dddddd"
+                            }
+                        }
+                    }
                 }
             }
         }
