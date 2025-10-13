@@ -9,6 +9,7 @@ ApplicationWindow {
     visible: true
     title: "Stitch Design - Dashboard"
     property var colors: Qt.createComponent("Colors.qml").createObject(this)
+    //property var prescription: Qt.createComponent("PrescriptionEditor.qml").createObject(this)
 
     background: Rectangle {
         color: Colors.backgroundColor
@@ -88,6 +89,8 @@ ApplicationWindow {
                                 radius: 8
                                 border.color: "#dddddd"
                             }
+                            onClicked: stack.push("PrescriptionEditor.qml")
+
                         }
 
                         Button {
@@ -126,7 +129,11 @@ ApplicationWindow {
             Layout.topMargin: 50
 
             // --- Main Content ---
-            Flickable {
+            StackView {
+                id: stack
+                anchors.fill: parent
+                initialItem:  Flickable {
+                //id : DashboardPage
                 anchors.fill: parent
                 contentWidth: parent.width
                 contentHeight: column.implicitHeight
@@ -220,6 +227,7 @@ ApplicationWindow {
                         }
                     }
                 }
+            }
             }
         }
     }
