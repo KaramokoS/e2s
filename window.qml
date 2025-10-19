@@ -103,6 +103,7 @@ ApplicationWindow {
                                 radius: 8
                                 border.color: "#dddddd"
                             }
+                            onClicked: stack.push("Hospitalization.qml")
                         }
 
                         Button {
