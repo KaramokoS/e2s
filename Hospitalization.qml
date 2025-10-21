@@ -38,8 +38,8 @@ Item {
 
                 // --- Bouton : Nouveau patient ---
                 Rectangle {
-                    Layout.preferredWidth: 220
-                    Layout.preferredHeight: 160
+                    Layout.preferredWidth: 150
+                    Layout.preferredHeight: 100
                     radius: 20
                     color: "white"
                     border.color: "#2980b9"
@@ -50,7 +50,7 @@ Item {
                         anchors.fill: parent
                         onClicked: root.newPatientClicked()
                         hoverEnabled: true
-                        onEntered: parent.color = "#2980b9"
+                        onEntered: parent.color = "#2c3e50"
                         onExited: parent.color = "white"
                     }
 
@@ -58,7 +58,7 @@ Item {
                         anchors.centerIn: parent
                         spacing: 8
                         Image {
-                            source: "qrc:/icons/add_patient.png"
+                            source: "icons/add_patient.png"
                             width: 48
                             height: 48
                         }
@@ -74,8 +74,8 @@ Item {
 
                 // --- Bouton : Suivi hospitalisation ---
                 Rectangle {
-                    Layout.preferredWidth: 220
-                    Layout.preferredHeight: 160
+                    Layout.preferredWidth: 150
+                    Layout.preferredHeight: 100
                     radius: 20
                     color: "white"
                     border.color: "#2980b9"
@@ -85,7 +85,7 @@ Item {
                         anchors.fill: parent
                         onClicked: root.followupClicked()
                         hoverEnabled: true
-                        onEntered: parent.color = "#2980b9"
+                        onEntered: parent.color = "#2c3e50"
                         onExited: parent.color = "white"
                     }
 
@@ -93,7 +93,7 @@ Item {
                         anchors.centerIn: parent
                         spacing: 8
                         Image {
-                            source: "qrc:/icons/followup.png"
+                            source: "icons/follow_patient.png"
                             width: 48
                             height: 48
                         }
@@ -109,8 +109,8 @@ Item {
 
                 // --- Bouton : Préparer la sortie ---
                 Rectangle {
-                    Layout.preferredWidth: 220
-                    Layout.preferredHeight: 160
+                    Layout.preferredWidth: 150
+                    Layout.preferredHeight: 100
                     radius: 20
                     color: "white"
                     border.color: "#2980b9"
@@ -120,7 +120,7 @@ Item {
                         anchors.fill: parent
                         onClicked: root.dischargeClicked()
                         hoverEnabled: true
-                        onEntered: parent.color = "#2980b9"
+                        onEntered: parent.color = "#2c3e50"
                         onExited: parent.color = "white"
                     }
 
@@ -128,7 +128,7 @@ Item {
                         anchors.centerIn: parent
                         spacing: 8
                         Image {
-                            source: "qrc:/icons/discharge.png"
+                            source: "icons/release_patient.png"
                             width: 48
                             height: 48
                         }

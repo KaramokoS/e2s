@@ -1,3 +1,4 @@
+// HospitalizationForm.qml
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
@@ -5,8 +6,9 @@ import QtQuick.Layouts 1.15
 Item {
     id: root
     anchors.fill: parent
+    anchors.margins: 20
 
-    // === Signaux pour intégration backend ===
+    // === Signaux ===
     signal saveRequested(string hospitalizationJson)
     signal printRequested(string hospitalizationJson)
     signal shareRequested(string hospitalizationJson, string target)
@@ -19,40 +21,48 @@ Item {
     property date admissionDate: new Date()
     property date dischargeDate: new Date()
     property string responsibleDoctor: ""
+    property string reporterDoctor: ""
     property string reason: ""
-    property string diagnosis: ""
+    property string backgrounds: ""
+    property string surgicalBackgrounds: ""
+    property string familyBackgrounds: ""
     property string treatment: ""
     property string evolution: ""
+    property string wayOfLife: ""
 
-    // === Fonction utilitaire pour générer le JSON ===
+    property bool showSurgical: false
+    property bool showFamily: false
+
+    // === Fonction utilitaire ===
     function buildJson() {
         var data = {
-            patientName: patientName,
-            patientId: patientId,
-            service: service,
-            roomNumber: roomNumber,
+            patientName, patientId, service, roomNumber,
             admissionDate: admissionDate.toISOString(),
             dischargeDate: dischargeDate.toISOString(),
-            responsibleDoctor: responsibleDoctor,
-            reason: reason,
-            diagnosis: diagnosis,
-            treatment: treatment,
-            evolution: evolution
+            responsibleDoctor, reporterDoctor,
+            reason, backgrounds, surgicalBackgrounds, familyBackgrounds,
+            treatment, evolution, wayOfLife
         }
         return JSON.stringify(data)
     }
 
-    // === Layout principal ===
     Flickable {
+        id: flick
         anchors.fill: parent
+        anchors.margins: 20
         contentWidth: parent.width
         contentHeight: column.implicitHeight
+        clip: true
+
+        ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AsNeeded
+        }
 
         ColumnLayout {
             id: column
             width: parent.width
             spacing: 14
-            //padding: 20
+            anchors.margins: 20
 
             // === En-tête ===
             RowLayout {
@@ -133,10 +143,13 @@ Item {
 
                     Label { text: qsTr("Médecin responsable :") }
                     TextField { text: root.responsibleDoctor; onTextChanged: root.responsibleDoctor = text }
+
+                    Label { text: qsTr("Identité du rédacteur :") }
+                    TextField { text: root.reporterDoctor; onTextChanged: root.reporterDoctor = text }
                 }
             }
 
-            // === Contenu médical ===
+            // === Compte rendu médical ===
             GroupBox {
                 title: qsTr("Compte rendu médical")
                 Layout.fillWidth: true
@@ -153,13 +166,63 @@ Item {
                         onTextChanged: root.reason = text
                     }
 
-                    Label { text: qsTr("Diagnostic :") }
+                    // --- Antécédents médicaux + boutons d'ajout ---
+                    
+                    Label { text: qsTr("Antécédents médicaux :") }
                     TextArea {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 80
-                        text: root.diagnosis
+                        text: root.backgrounds
                         wrapMode: Text.Wrap
-                        onTextChanged: root.diagnosis = text
+                        onTextChanged: root.backgrounds = text
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        Button {
+                            text: qsTr("➕ Chirurgicaux")
+                            onClicked: root.showSurgical = true
+                        }
+                        Button {
+                            text: qsTr("➕ Familiaux")
+                            onClicked: root.showFamily = true
+                        }
+                    }
+                    // --- Antécédents chirurgicaux (affichage conditionnel) ---
+                    ColumnLayout {
+                        visible: root.showSurgical
+                        spacing: 4
+                        Label { text: qsTr("Antécédents chirurgicaux :") }
+                        TextArea {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 80
+                            text: root.surgicalBackgrounds
+                            wrapMode: Text.Wrap
+                            onTextChanged: root.surgicalBackgrounds = text
+                        }
+                    }
+
+                    // --- Antécédents familiaux (affichage conditionnel) ---
+                    ColumnLayout {
+                        visible: root.showFamily
+                        spacing: 4
+                        Label { text: qsTr("Antécédents familiaux :") }
+                        TextArea {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 80
+                            text: root.familyBackgrounds
+                            wrapMode: Text.Wrap
+                            onTextChanged: root.familyBackgrounds = text
+                        }
+                    }
+
+                    Label { text: qsTr("Mode de vie :") }
+                    TextArea {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 80
+                        text: root.wayOfLife
+                        wrapMode: Text.Wrap
+                        onTextChanged: root.wayOfLife = text
                     }
 
                     Label { text: qsTr("Traitement :") }
@@ -186,7 +249,6 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 10
-
                 Item { Layout.fillWidth: true }
 
                 Button {
@@ -218,8 +280,6 @@ Item {
         modal: true
         title: qsTr("Sélectionner la date d'admission")
         standardButtons: Dialog.Ok | Dialog.Cancel
-        //contentItem: CalendarView { id: admissionCalendar; selectedDate: root.admissionDate }
-        onAccepted: root.admissionDate = admissionCalendar.selectedDate
     }
 
     Dialog {
@@ -227,11 +287,9 @@ Item {
         modal: true
         title: qsTr("Sélectionner la date de sortie")
         standardButtons: Dialog.Ok | Dialog.Cancel
-        //contentItem: CalendarView { id: dischargeCalendar; selectedDate: root.dischargeDate }
-        onAccepted: root.dischargeDate = dischargeCalendar.selectedDate
     }
 
-    // === Fonction utilitaire pour charger depuis JSON ===
+    // === Charger depuis JSON ===
     function loadFromJson(json) {
         try {
             var o = JSON.parse(json)
@@ -242,10 +300,16 @@ Item {
             admissionDate = o.admissionDate ? new Date(o.admissionDate) : new Date()
             dischargeDate = o.dischargeDate ? new Date(o.dischargeDate) : new Date()
             responsibleDoctor = o.responsibleDoctor || ""
+            reporterDoctor = o.reporterDoctor || ""
             reason = o.reason || ""
-            diagnosis = o.diagnosis || ""
+            backgrounds = o.backgrounds || ""
+            surgicalBackgrounds = o.surgicalBackgrounds || ""
+            familyBackgrounds = o.familyBackgrounds || ""
             treatment = o.treatment || ""
+            wayOfLife = o.wayOfLife || ""
             evolution = o.evolution || ""
+            showSurgical = !!o.surgicalBackgrounds
+            showFamily = !!o.familyBackgrounds
         } catch (e) {
             console.warn("Hospitalization load error:", e)
         }
