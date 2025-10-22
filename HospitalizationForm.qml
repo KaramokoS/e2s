@@ -29,6 +29,12 @@ Item {
     property string treatment: ""
     property string evolution: ""
     property string wayOfLife: ""
+    property string historyOfDisease: ""
+    property string clinicalExamination: ""
+    property string diagnosticHypothesis: ""
+    property string initialSupport: ""
+    property string biologicalAssessment: ""
+    property string imaging: ""
 
     property bool showSurgical: false
     property bool showFamily: false
@@ -41,7 +47,8 @@ Item {
             dischargeDate: dischargeDate.toISOString(),
             responsibleDoctor, reporterDoctor,
             reason, backgrounds, surgicalBackgrounds, familyBackgrounds,
-            treatment, evolution, wayOfLife
+            treatment, evolution, wayOfLife, historyOfDisease, clinicalExamination,
+            diagnosticHypothesis, initialSupport, biologicalAssessment, imaging
         }
         return JSON.stringify(data)
     }
@@ -157,10 +164,10 @@ Item {
                 ColumnLayout {
                     spacing: 12
 
-                    Label { text: qsTr("Motif d'admission :") }
+                    Label { text: qsTr("Motif d'Admission :") }
                     TextArea {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 150
                         text: root.reason
                         wrapMode: Text.Wrap
                         onTextChanged: root.reason = text
@@ -168,10 +175,10 @@ Item {
 
                     // --- Antécédents médicaux + boutons d'ajout ---
                     
-                    Label { text: qsTr("Antécédents médicaux :") }
+                    Label { text: qsTr("Antécédents Médicaux :") }
                     TextArea {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 150
                         text: root.backgrounds
                         wrapMode: Text.Wrap
                         onTextChanged: root.backgrounds = text
@@ -192,10 +199,10 @@ Item {
                     ColumnLayout {
                         visible: root.showSurgical
                         spacing: 4
-                        Label { text: qsTr("Antécédents chirurgicaux :") }
+                        Label { text: qsTr("Antécédents Chirurgicaux :") }
                         TextArea {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 80
+                            Layout.preferredHeight: 150
                             text: root.surgicalBackgrounds
                             wrapMode: Text.Wrap
                             onTextChanged: root.surgicalBackgrounds = text
@@ -206,10 +213,10 @@ Item {
                     ColumnLayout {
                         visible: root.showFamily
                         spacing: 4
-                        Label { text: qsTr("Antécédents familiaux :") }
+                        Label { text: qsTr("Antécédents Familiaux :") }
                         TextArea {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 80
+                            Layout.preferredHeight: 150
                             text: root.familyBackgrounds
                             wrapMode: Text.Wrap
                             onTextChanged: root.familyBackgrounds = text
@@ -219,28 +226,71 @@ Item {
                     Label { text: qsTr("Mode de vie :") }
                     TextArea {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 150
                         text: root.wayOfLife
                         wrapMode: Text.Wrap
                         onTextChanged: root.wayOfLife = text
                     }
 
-                    Label { text: qsTr("Traitement :") }
+                    Label { text: qsTr("Traitement Habituel :") }
                     TextArea {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 150
                         text: root.treatment
                         wrapMode: Text.Wrap
                         onTextChanged: root.treatment = text
                     }
 
-                    Label { text: qsTr("Évolution / Observations :") }
+                    Label { text: qsTr("Histoire de la Maladie :") }
                     TextArea {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 100
-                        text: root.evolution
+                        Layout.preferredHeight: 150
+                        text: root.historyOfDisease
                         wrapMode: Text.Wrap
-                        onTextChanged: root.evolution = text
+                        onTextChanged: root.historyOfDisease = text
+                    }
+
+                    Label { text: qsTr("Examen Clinique :") }
+                    TextArea {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 150
+                        text: root.clinicalExamination
+                        wrapMode: Text.Wrap
+                        onTextChanged: root.clinicalExamination = text
+                    }
+
+                    Label { text: qsTr("Hypothèse Diagnostique :") }
+                    TextArea {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 150
+                        text: root.diagnosticHypothesis
+                        wrapMode: Text.Wrap
+                        onTextChanged: root.diagnosticHypothesis = text
+                    }
+                    Label { text: qsTr("Prise en Charge Initiale :") }
+                    TextArea {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 150
+                        text: root.initialSupport
+                        wrapMode: Text.Wrap
+                        onTextChanged: root.initialSupport = text
+                    }
+                    Label { text: qsTr("Bilan Biologique :") }
+                    TextArea {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 150
+                        text: root.biologicalAssessment
+                        wrapMode: Text.Wrap
+                        onTextChanged: root.biologicalAssessment = text
+                    }
+
+                    Label { text: qsTr("Imagerie :") }
+                    TextArea {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 150
+                        text: root.imaging
+                        wrapMode: Text.Wrap
+                        onTextChanged: root.imaging = text
                     }
                 }
             }
@@ -308,6 +358,12 @@ Item {
             treatment = o.treatment || ""
             wayOfLife = o.wayOfLife || ""
             evolution = o.evolution || ""
+            historyOfDisease = o.historyOfDisease || ""
+            clinicalExamination = o.clinicalExamination || ""
+            diagnosticHypothesis = o.diagnosticHypothesis || ""
+            initialSupport = o.initialSupport || ""
+            biologicalAssessment = o.biologicalAssessment || ""
+            imaging = o.imaging || ""
             showSurgical = !!o.surgicalBackgrounds
             showFamily = !!o.familyBackgrounds
         } catch (e) {
