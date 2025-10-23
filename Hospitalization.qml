@@ -149,4 +149,13 @@ Item {
         console.log("📋 Nouveau patient demandé")
         stack.push("HospitalizationForm.qml")
     }
+
+    onFollowupClicked : {
+        stack.push("PatientIdentification.qml")
+    }
+
+    onDischargeClicked : {
+        stack.push("PatientIdentification.qml")
+    }
+
 }
