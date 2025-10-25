@@ -130,8 +130,15 @@ Item {
                     RowLayout {
                         spacing: 6
                         TextField {
-                            readOnly: true
+                            placeholderText: qsTr("Date (JJ/MM/AAAA)")
                             text: Qt.formatDate(root.admissionDate, "dd/MM/yyyy")
+                            onEditingFinished: {
+                                var parts = text.split("/");
+                                if (parts.length === 3) {
+                                    var d = new Date(parts[2], parts[1]-1, parts[0]);
+                                    if (!isNaN(d)) root.admissionDate = d;
+                                }
+                            }
                             width: 120
                         }
                         Button { text: "📅"; onClicked: admissionDialog.open() }
@@ -141,8 +148,15 @@ Item {
                     RowLayout {
                         spacing: 6
                         TextField {
-                            readOnly: true
+                            placeholderText: qsTr("Date (JJ/MM/AAAA)")
                             text: Qt.formatDate(root.dischargeDate, "dd/MM/yyyy")
+                            onEditingFinished: {
+                                var parts = text.split("/");
+                                if (parts.length === 3) {
+                                    var d = new Date(parts[2], parts[1]-1, parts[0]);
+                                    if (!isNaN(d)) root.dischargeDate = d;
+                                }
+                            }
                             width: 120
                         }
                         Button { text: "📅"; onClicked: dischargeDialog.open() }

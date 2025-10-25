@@ -118,8 +118,15 @@ Item {
                 RowLayout {
                     spacing: 6
                     TextField {
-                        readOnly: true
+                        placeholderText: qsTr("Date (JJ/MM/AAAA)")
                         text: Qt.formatDate(root.birthDate, "dd/MM/yyyy")
+                        onEditingFinished: {
+                            var parts = text.split("/");
+                            if (parts.length === 3) {
+                                var d = new Date(parts[2], parts[1]-1, parts[0]);
+                                if (!isNaN(d)) root.birthDate = d;
+                            }
+                        }
                         width: 120
                     }
                     Button {
@@ -153,7 +160,7 @@ Item {
         modal: true
         title: qsTr("Sélectionner la date de naissance")
         standardButtons: Dialog.Ok | Dialog.Cancel
-
+        // solve this to have a calendar view
         //contentItem: CalendarView {
         //    id: birthCalendar
         //    selectedDate: root.birthDate
@@ -166,7 +173,16 @@ Item {
     Dialog {
         id: messageDialog
         title: qsTr("Information")
-        //text: ""
+        property string text:""
+        contentItem: Text {
+            text: messageDialog.text
+        }
         standardButtons: Dialog.Ok
+    }
+
+    onPatientIdentified: {
+        var patient = JSON.parse(patientJson)
+        console.log("New patient identified:", patient.firstName)
+        stack.push("HospitalizationFollowUp.qml")
     }
 }
