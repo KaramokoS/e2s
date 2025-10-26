@@ -151,11 +151,11 @@ Item {
     }
 
     onFollowupClicked : {
-        stack.push("PatientIdentification.qml")
+        stack.push("PatientIdentification.qml", { buttonName: "FollowUpButton" })
     }
 
     onDischargeClicked : {
-        stack.push("PatientIdentification.qml")
+        stack.push("PatientIdentification.qml",  { buttonName: "DischargeButton" })
     }
 
 }

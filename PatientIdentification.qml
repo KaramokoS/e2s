@@ -11,6 +11,10 @@ Item {
     // --- Signal envoyé lorsqu’on identifie un patient ---
     signal patientIdentified(string patientJson)
 
+    // config
+
+    property string buttonName: ""
+
     // --- Données du patient ---
     property string patientId: ""
     property string firstName: ""
@@ -182,7 +186,11 @@ Item {
 
     onPatientIdentified: {
         var patient = JSON.parse(patientJson)
-        console.log("New patient identified:", patient.firstName)
-        stack.push("HospitalizationFollowUp.qml")
+        console.log("New patient identified:", patient.firstName, "Buton name ::", root.buttonName)
+        if (root.buttonName == "FollowUpButton") {
+            stack.push("HospitalizationFollowUp.qml")
+        } else if (root.buttonName == "DischargeButton") {
+            stack.push("HospitalizationDischarge.qml")
+        }
     }
 }
