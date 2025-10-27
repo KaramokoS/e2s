@@ -191,6 +191,8 @@ Item {
             stack.push("HospitalizationFollowUp.qml")
         } else if (root.buttonName == "DischargeButton") {
             stack.push("HospitalizationDischarge.qml")
+        } else if (root.buttonName == "prescriptionButton") {
+            stack.push("PrescriptionList.qml")
         }
     }
 }

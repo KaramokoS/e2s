@@ -89,7 +89,7 @@ ApplicationWindow {
                                 radius: 8
                                 border.color: "#dddddd"
                             }
-                            onClicked: stack.push("PrescriptionEditor.qml")
+                            onClicked: stack.push("patientMenu.qml")
 
                         }
 
