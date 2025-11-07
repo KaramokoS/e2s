@@ -1,3 +1,4 @@
+import datetime
 import sys
 import os
 import json
@@ -14,11 +15,234 @@ from reportlab.lib.pagesizes import A4
 
 
 os.environ["QT_QPA_PLATFORM"] = "xcb"
-import os
 os.environ["QT_QUICK_BACKEND"] = "software"
 
 
 class PrescriptionBackend(QObject):
+    @Slot(str)
+    def generate_discharge_report(self, json_data):
+        """
+        Génère un PDF de sortie d'hospitalisation à partir des données JSON.
+        """
+        output_pdf = "ref_files/sortie_hospitalisation.pdf"
+        data = json.loads(json_data)
+
+        c = canvas.Canvas(output_pdf, pagesize=A4)
+        width, height = A4
+        y = height - 50
+
+        # === EN-TÊTE ===
+        c.setFont("Helvetica-Bold", 18)
+        c.drawCentredString(width / 2, y, "Compte Rendu de Sortie d'Hospitalisation")
+        y -= 40
+
+        # === INFORMATIONS PATIENT ===
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(40, y, "Informations du patient :")
+        y -= 20
+        c.setFont("Helvetica", 10)
+        c.drawString(50, y, f"Nom du patient : {data.get('patientName', '')}")
+        y -= 14
+        c.drawString(50, y, f"Identifiant : {data.get('patientId', '')}")
+        y -= 14
+        c.drawString(50, y, f"Date de sortie : {data.get('dischargeDate', '')[:10]}")
+        y -= 14
+        c.drawString(50, y, f"Rédacteur du rapport : Dr {data.get('reporterDoctor', '')}")
+        y -= 30
+
+        # === SECTIONS PRINCIPALES ===
+        def draw_section(title, text):
+            nonlocal y
+            if not text:
+                return
+            if y < 120:
+                c.showPage()
+                y = height - 50
+            c.setFont("Helvetica-Bold", 12)
+            c.drawString(40, y, title)
+            y -= 16
+            c.setFont("Helvetica", 10)
+            text_obj = c.beginText(50, y)
+            for line in text.split("\n"):
+                if y < 80:
+                    c.drawText(text_obj)
+                    c.showPage()
+                    y = height - 50
+                    text_obj = c.beginText(50, y)
+                text_obj.textLine(line)
+                y -= 12
+            c.drawText(text_obj)
+            y -= 20
+
+        draw_section("Synthèse d'hospitalisation :", data.get("synthesis", ""))
+        draw_section("Conclusion médicale :", data.get("conclusion", ""))
+
+        # === SIGNATURE & PIED DE PAGE ===
+        c.setFont("Helvetica-Bold", 11)
+        c.drawRightString(width - 60, 100, f"Dr {data.get('reporterDoctor', '')}")
+        c.line(width - 160, 95, width - 40, 95)
+        c.setFont("Helvetica", 9)
+        c.drawRightString(width - 60, 80, "Signature")
+
+        c.setFont("Helvetica-Oblique", 9)
+        c.drawCentredString(width / 2, 40, f"Document généré le {datetime.datetime.now().strftime('%d/%m/%Y à %H:%M')} - PharmNet Hospital")
+
+        c.save()
+        print(f"✅ PDF de sortie généré : {output_pdf}")
+
+    @Slot(str)
+    def generate_followup_report(self, json_data):
+        """
+        Génère un PDF de suivi d'hospitalisation à partir d'un JSON produit par le QML.
+        """
+        output_pdf = "ref_files/suivi_hospitalisation.pdf"
+        data = json.loads(json_data)
+
+        c = canvas.Canvas(output_pdf, pagesize=A4)
+        width, height = A4
+        y = height - 50
+
+        # === EN-TÊTE ===
+        c.setFont("Helvetica-Bold", 18)
+        c.drawCentredString(width / 2, y, "Suivi d'Hospitalisation")
+        y -= 40
+
+        # === INFORMATIONS GÉNÉRALES ===
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(40, y, "Informations du patient")
+        y -= 20
+        c.setFont("Helvetica", 10)
+        c.drawString(50, y, f"Nom du patient : {data.get('patientName', '')}")
+        y -= 14
+        c.drawString(50, y, f"Identifiant : {data.get('patientId', '')}")
+        y -= 14
+        c.drawString(50, y, f"Date de visite : {data.get('visitDate', '')[:10]}")
+        y -= 14
+        c.drawString(50, y, f"Rédigé par : Dr {data.get('reporterDoctor', '')}")
+        y -= 30
+
+        # === CONTENU DU SUIVI ===
+        def draw_section(title, text):
+            nonlocal y
+            if not text:
+                return
+            if y < 120:
+                c.showPage()
+                y = height - 50
+            c.setFont("Helvetica-Bold", 12)
+            c.drawString(40, y, title)
+            y -= 16
+            c.setFont("Helvetica", 10)
+            text_obj = c.beginText(50, y)
+            for line in text.split("\n"):
+                if y < 80:
+                    c.drawText(text_obj)
+                    c.showPage()
+                    y = height - 50
+                    text_obj = c.beginText(50, y)
+                text_obj.textLine(line)
+                y -= 12
+            c.drawText(text_obj)
+            y -= 20
+
+        draw_section("Observation et suivi :", data.get("followUpText", ""))
+        draw_section("Examens complémentaires :", data.get("complementaryExam", ""))
+
+        # === PIED DE PAGE ===
+        c.setFont("Helvetica-Oblique", 9)
+        c.drawCentredString(width / 2, 40, f"Document généré le {datetime.datetime.now().strftime('%d/%m/%Y à %H:%M')} - PharmNet Hospital")
+
+        c.save()
+        print(f"✅ PDF de suivi généré : {output_pdf}")
+
+
+    @Slot(str)
+    def generate_hospitalization_report(self, json_data):
+        """
+        Génère un PDF de compte rendu d'hospitalisation à partir des données JSON.
+        Appelée depuis QML : ex. HospitalizationForm.printRequested(json)
+        """
+        output_pdf = "ref_files/monorapport.pdf"
+        data = json.loads(json_data)
+        c = canvas.Canvas(output_pdf, pagesize=A4)
+        width, height = A4
+        y = height - 50
+
+        # === En-tête ===
+        c.setFont("Helvetica-Bold", 16)
+        c.drawCentredString(width / 2, y, "Compte Rendu d'Hospitalisation")
+        y -= 40
+
+        # === Informations Patient ===
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(40, y, "Informations du patient :")
+        y -= 20
+        c.setFont("Helvetica", 11)
+        c.drawString(50, y, f"Nom : {data.get('patientName', '')}")
+        y -= 14
+        c.drawString(50, y, f"Identifiant : {data.get('patientId', '')}")
+        y -= 14
+        c.drawString(50, y, f"Service : {data.get('service', '')}")
+        y -= 14
+        c.drawString(50, y, f"Chambre : {data.get('roomNumber', '')}")
+        y -= 14
+        c.drawString(50, y, f"Admission : {data.get('admissionDate', '')[:10]}  |  Sortie : {data.get('dischargeDate', '')[:10]}")
+        y -= 14
+        c.drawString(50, y, f"Médecin responsable : {data.get('responsibleDoctor', '')}")
+        y -= 14
+        c.drawString(50, y, f"Rédacteur du rapport : {data.get('reporterDoctor', '')}")
+        y -= 30
+
+        # === Contenu médical ===
+        def draw_section(title, text):
+            nonlocal y
+            if not text:
+                return
+            if y < 100:
+                c.showPage()
+                y = height - 50
+            c.setFont("Helvetica-Bold", 12)
+            c.drawString(40, y, title)
+            y -= 16
+            c.setFont("Helvetica", 10)
+            text_obj = c.beginText(50, y)
+            for line in text.split("\n"):
+                if y < 80:
+                    c.drawText(text_obj)
+                    c.showPage()
+                    y = height - 60
+                    text_obj = c.beginText(50, y)
+                text_obj.textLine(line)
+                y -= 12
+            c.drawText(text_obj)
+            y -= 20
+
+        sections = [
+            ("Motif d'admission", data.get("reason")),
+            ("Antécédents médicaux", data.get("backgrounds")),
+            ("Antécédents chirurgicaux", data.get("surgicalBackgrounds")),
+            ("Antécédents familiaux", data.get("familyBackgrounds")),
+            ("Mode de vie", data.get("wayOfLife")),
+            ("Traitement habituel", data.get("treatment")),
+            ("Histoire de la maladie", data.get("historyOfDisease")),
+            ("Examen clinique", data.get("clinicalExamination")),
+            ("Hypothèse diagnostique", data.get("diagnosticHypothesis")),
+            ("Prise en charge initiale", data.get("initialSupport")),
+            ("Bilan biologique", data.get("biologicalAssessment")),
+            ("Imagerie", data.get("imaging")),
+            ("Évolution", data.get("evolution"))
+        ]
+
+        for title, text in sections:
+            draw_section(title, text)
+
+        # === Pied de page ===
+        c.setFont("Helvetica-Oblique", 9)
+        c.drawCentredString(width / 2, 40, f"Document généré le {datetime.datetime.now().strftime('%d/%m/%Y à %H:%M')} - PharmNet Hospital")
+
+        c.save()
+        print(f"✅ Compte rendu PDF généré : {output_pdf}")
+
     @Slot(str)
     def generatePrescriptionPDF(self, json_string):
         """Slot appelé depuis QML"""

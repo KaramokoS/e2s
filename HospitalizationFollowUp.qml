@@ -186,12 +186,12 @@ Item {
                 Item { Layout.fillWidth: true }
 
                 Button {
-                    text: qsTr("Sauvegarder")
-                    onClicked: root.saveRequested(root.buildJson())
-                }
-                Button {
-                    text: qsTr("Imprimer PDF")
-                    onClicked: root.printRequested(root.buildJson())
+                    text: qsTr("Sauvegarder PDF")
+                    onClicked: {
+                        var json = root.buildJson()
+                        PrescriptionBackend.generate_followup_report(json)
+
+                    }
                 }
                 Button {
                     text: qsTr("Partager")

@@ -320,8 +320,12 @@ Item {
                     onClicked: root.saveRequested(root.buildJson())
                 }
                 Button {
-                    text: qsTr("Imprimer PDF")
-                    onClicked: root.printRequested(root.buildJson())
+                    text: qsTr("Sauvegarder PDF")
+                    onClicked: {
+                        var json = root.buildJson()
+                        root.saveRequested(json)
+                        PrescriptionBackend.generate_hospitalization_report(json)
+                    }
                 }
                 Button {
                     text: qsTr("Partager")
