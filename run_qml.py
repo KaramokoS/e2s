@@ -7,11 +7,17 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QObject, Slot, QUrl
 from PySide6.QtGui import QGuiApplication
+from urllib.parse import urlparse, unquote
+from pathlib import Path
+
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
 from reportlab.graphics.barcode import code128
 from reportlab.lib.pagesizes import A4
+import backend as bck
+from database import init_db, get_connection, ensure_patient_exists
+
 
 
 os.environ["QT_QPA_PLATFORM"] = "xcb"
@@ -19,12 +25,16 @@ os.environ["QT_QUICK_BACKEND"] = "software"
 
 
 class PrescriptionBackend(QObject):
-    @Slot(str)
-    def generate_discharge_report(self, json_data):
+    @Slot(str, str)
+    def generate_discharge_report(self, json_data, qml_url):
         """
         Génère un PDF de sortie d'hospitalisation à partir des données JSON.
         """
-        output_pdf = "ref_files/sortie_hospitalisation.pdf"
+
+        parsed = urlparse(qml_url)
+        output_pdf = Path(unquote(parsed.path))
+        output_pdf = str(output_pdf)
+
         data = json.loads(json_data)
 
         c = canvas.Canvas(output_pdf, pagesize=A4)
@@ -90,12 +100,32 @@ class PrescriptionBackend(QObject):
         c.save()
         print(f"✅ PDF de sortie généré : {output_pdf}")
 
-    @Slot(str)
-    def generate_followup_report(self, json_data):
+        # === ENREGISTREMENT EN BASE ===
+        conn = get_connection()
+        cur = conn.cursor()
+
+        # Trouver l’hospitalisation correspondante
+        cur.execute("SELECT id FROM hospitalizations WHERE patient_id = ? ORDER BY id DESC LIMIT 1", (data.get("patientId"),))
+        hosp = cur.fetchone()
+        hospitalization_id = hosp["id"] if hosp else None
+
+        cur.execute("""
+            INSERT INTO discharges (hospitalization_id, discharge_json, reporter_doctor)
+            VALUES (?, ?, ?)
+        """, (hospitalization_id, json_data, data.get("reporterDoctor")))
+        conn.commit()
+        conn.close()
+        print("✅ Sortie d'hospitalisation sauvegardée en base de données.")
+
+    @Slot(str, str)
+    def generate_followup_report(self, json_data, qml_url):
         """
         Génère un PDF de suivi d'hospitalisation à partir d'un JSON produit par le QML.
         """
-        output_pdf = "ref_files/suivi_hospitalisation.pdf"
+        parsed = urlparse(qml_url)
+        output_pdf = Path(unquote(parsed.path))
+        output_pdf = str(output_pdf)
+
         data = json.loads(json_data)
 
         c = canvas.Canvas(output_pdf, pagesize=A4)
@@ -155,14 +185,33 @@ class PrescriptionBackend(QObject):
         c.save()
         print(f"✅ PDF de suivi généré : {output_pdf}")
 
+        # === ENREGISTREMENT EN BASE ===
+        conn = get_connection()
+        cur = conn.cursor()
 
-    @Slot(str)
-    def generate_hospitalization_report(self, json_data):
+        # Récupère la dernière hospitalisation du patient
+        cur.execute("SELECT id FROM hospitalizations WHERE patient_id = ? ORDER BY id DESC LIMIT 1", (data.get("patientId"),))
+        hosp = cur.fetchone()
+        hospitalization_id = hosp["id"] if hosp else None
+
+        cur.execute("""
+            INSERT INTO followups (hospitalization_id, followup_json, reporter_doctor)
+            VALUES (?, ?, ?)
+        """, (hospitalization_id, json_data, data.get("reporterDoctor")))
+        conn.commit()
+        conn.close()
+        print("💾 Suivi hospitalier enregistré dans la base.")
+
+
+    @Slot(str, str)
+    def generate_hospitalization_report(self, json_data, qml_url):
         """
         Génère un PDF de compte rendu d'hospitalisation à partir des données JSON.
         Appelée depuis QML : ex. HospitalizationForm.printRequested(json)
         """
-        output_pdf = "ref_files/monorapport.pdf"
+        parsed = urlparse(qml_url)
+        output_pdf = Path(unquote(parsed.path))
+        output_pdf = str(output_pdf)
         data = json.loads(json_data)
         c = canvas.Canvas(output_pdf, pagesize=A4)
         width, height = A4
@@ -243,12 +292,46 @@ class PrescriptionBackend(QObject):
         c.save()
         print(f"✅ Compte rendu PDF généré : {output_pdf}")
 
-    @Slot(str)
-    def generatePrescriptionPDF(self, json_string):
+        # === Enregistrement en base ===
+        patient_info = {
+            "patient_id": data["patient"]["ID"],
+            "name": data["patient"]["name"],
+            "birth_date": data["patient"].get("birth_date"),
+            "gender": data["patient"].get("gender"),
+            "address": data["patient"].get("address"),
+            "phone": data["patient"].get("phone")
+        }
+        ensure_patient_exists(patient_info)
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO hospitalizations (
+                patient_id, admission_date, discharge_date, service, room_number,
+                responsible_doctor, reporter_doctor, report_json
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get("patientId"),
+            data.get("admissionDate"),
+            data.get("dischargeDate"),
+            data.get("service"),
+            data.get("roomNumber"),
+            data.get("responsibleDoctor"),
+            data.get("reporterDoctor"),
+            json_data
+        ))
+        conn.commit()
+        conn.close()
+        print("💾 Données hospitalisation enregistrées dans la base.")
+
+    @Slot(str, str)
+    def generatePrescriptionPDF(self, json_string, qml_url):
         """Slot appelé depuis QML"""
         data = json.loads(json_string)
 
-        output_pdf = "ref_files/monordonnance.pdf"
+        parsed = urlparse(qml_url)
+        output_pdf = Path(unquote(parsed.path))
+        output_pdf = str(output_pdf)
 
         c = canvas.Canvas(output_pdf, pagesize=A4)
         width, height = A4
@@ -315,12 +398,78 @@ class PrescriptionBackend(QObject):
         c.save()
         print(f"✅ Ordonnance PDF généré : {output_pdf}")
 
+        patient_info = {
+            "patient_id": data["patient"]["ID"],
+            "name": data["patient"]["name"],
+            "birth_date": data["patient"].get("birth_date"),
+            "gender": data["patient"].get("gender"),
+            "address": data["patient"].get("address"),
+            "phone": data["patient"].get("phone")
+        }
+        ensure_patient_exists(patient_info)
+
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO prescriptions (patient_id, prescription_json, doctor_name)
+            VALUES (?, ?, ?)
+        """, (
+            data["patient"]["ID"],
+            json_string,
+            data["doctor"]["name"]
+        ))
+        conn.commit()
+        conn.close()
+        print("✅ Ordonnance sauvegardée en base de données.")
+
+    @Slot(str)
+    def get_patient_folder(patient_id: str):
+        conn = get_connection()
+        cur = conn.cursor()
+
+        # Récupère les infos patient
+        cur.execute("SELECT * FROM patients WHERE patient_id = ?", (patient_id,))
+        patient = cur.fetchone()
+
+        # Récupère hospitalisations, suivis, ordonnances
+        cur.execute("SELECT * FROM hospitalizations WHERE patient_id = ?", (patient_id,))
+        hospitalizations = cur.fetchall()
+
+        cur.execute("SELECT * FROM prescriptions WHERE patient_id = ?", (patient_id,))
+        prescriptions = cur.fetchall()
+
+        # Pour chaque hospitalisation, on peut charger les suivis et sorties
+        dossier = {
+            "patient": dict(patient) if patient else None,
+            "hospitalizations": [],
+            "prescriptions": [dict(p) for p in prescriptions]
+        }
+
+        for hosp in hospitalizations:
+            hid = hosp["id"]
+            cur.execute("SELECT * FROM followups WHERE hospitalization_id = ?", (hid,))
+            followups = [dict(f) for f in cur.fetchall()]
+            cur.execute("SELECT * FROM discharges WHERE hospitalization_id = ?", (hid,))
+            discharge = cur.fetchone()
+            dossier["hospitalizations"].append({
+                "info": dict(hosp),
+                "followups": followups,
+                "discharge": dict(discharge) if discharge else None
+            })
+
+        conn.close()
+        return dossier
+
 
 if __name__ == "__main__":
+    init_db()  # Crée les tables si besoin
+
     app = QApplication(sys.argv)
 
     engine = QQmlApplicationEngine()
     backend = PrescriptionBackend()
+    patientBackend = bck.Backend()
+    engine.rootContext().setContextProperty("PatientBackend", patientBackend)
     engine.rootContext().setContextProperty("PrescriptionBackend", backend)
 
     qml_file = os.path.join(os.path.dirname(__file__), "window.qml")

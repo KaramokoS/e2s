@@ -33,7 +33,7 @@ ApplicationWindow {
                 anchors.margins: 20  // internal padding
                 Rectangle {
                     id : _doctor
-                    color: "red"
+                    color: "white"
                     Layout.preferredWidth: parent.width
                     Layout.preferredHeight: 0.1*parent.height
                     Layout.topMargin: 10
@@ -44,7 +44,7 @@ ApplicationWindow {
                         Layout.alignment: Qt.AlignTop
                         spacing: 12
                         Image {
-                            source: "https://lh3.googleusercontent.com/aida-public/AB6AXuB5jpKyTOFH9WTCPVlYzEc1TW5A7EorQBwVdxm8I9VVQ7wYC1puqKTykR5MPVQimhN_zDC29Ee8jJPfzD7n7az2HleobNiNDK_6J48D9SA-W22y6KMReLsEZFCpKfyw77sBKavJvvTYqxnYa1vkZO26_NewZOMNQ4NYixlpCRXgE0ReQfk-LdT70DqscdP9LUwGiEfZboeNJOdezivL_4gaBcFTgLot1eATQ4BBgKFcujRI6ggTGoEmj0WnhbuWEYdqYbG6FqBIr4FC"
+                            source: "static/doctor.jpeg"
                             fillMode: Image.PreserveAspectFit
                             Layout.preferredWidth: 0.4*parent.width
                             Layout.preferredHeight: parent.height
@@ -56,14 +56,14 @@ ApplicationWindow {
                             Layout.alignment: Qt.AlignTop
 
                             Text {
-                                text: "Dr. Emily Carter"
+                                text: "Dr. Cheick Oumar Coulibaly"
                                 font.bold: true
                                 font.pixelSize: 16
                                 color: "#222"
                             }
 
                             Text {
-                                text: "emily@doctor.com"
+                                text: "cheick@doctor.com"
                                 font.pixelSize: 16
                                 color: "#555"
                             }
@@ -71,13 +71,32 @@ ApplicationWindow {
                     }
                 }
                 Rectangle {
-                    color: "green"
+                    color: "white"
                     Layout.fillHeight: true
                     Layout.preferredWidth: parent.width
                     Layout.topMargin: 10
                     ColumnLayout {
                         anchors.centerIn: parent
                         spacing: 20
+
+                        Button {
+                            text: "Calendrier"
+                            font.bold: true
+                            Layout.preferredWidth: 150
+                            Layout.preferredHeight: 40
+                            background: Rectangle {
+                                color: "#ffffff"
+                                radius: 8
+                                border.color: "#dddddd"
+                            }
+                            onClicked: {
+                                if (stack.depth > 1) {
+                                    // Return all the way to the dashboard (first screen)
+                                    while (stack.depth > 1)
+                                        stack.pop()
+                                }
+                            }
+                        }
 
                         Button {
                             text: "Patients"
@@ -90,7 +109,6 @@ ApplicationWindow {
                                 border.color: "#dddddd"
                             }
                             onClicked: stack.push("patientMenu.qml")
-
                         }
 
                         Button {
@@ -104,18 +122,6 @@ ApplicationWindow {
                                 border.color: "#dddddd"
                             }
                             onClicked: stack.push("Hospitalization.qml")
-                        }
-
-                        Button {
-                            text: "Calendrier"
-                            font.bold: true
-                            Layout.preferredWidth: 150
-                            Layout.preferredHeight: 40
-                            background: Rectangle {
-                                color: "#ffffff"
-                                radius: 8
-                                border.color: "#dddddd"
-                            }
                         }
                     }
                 }
@@ -163,11 +169,11 @@ ApplicationWindow {
                             spacing: 20
                             Column {
                                 spacing: 6
-                                Text { text: "Patient: Sarah Johnson"; font.bold: true; font.pixelSize: 16 }
-                                Text { text: "Age: 45, Gender: Female"; color: "#666"; font.pixelSize: 13 }
+                                Text { text: "Patient: Moussa Kansaye"; font.bold: true; font.pixelSize: 16 }
+                                Text { text: "Age: 45, Sexe: Masculin"; color: "#666"; font.pixelSize: 13 }
                             }
                             Image {
-                                source: "https://lh3.googleusercontent.com/aida-public/AB6AXuDKphM2AfRWzbV0tszprcvtPldzYd1a2oKYJVLxSBQmA-erGQom8Pk8tdBK79dHcyg5nmnKgPkT8wWYqzX9ESamVBSlXVJcK_obY-VY6rxabRezgfIpLiVwjco4YKothRIYTMwlumhvZXSy_mhp4oqGgI8f9YsC3D1plSm6xnNCTGPlIH0S485W6n5NIocBlSMdWrRPPpoWqiTX6XHMzvtpazkCvMWekQ46Nff4RcA5oNyHC2kZJRuOT5YUZWtth-ABoiBTmUBeYf7l"
+                                source: "static/patient.jpg"
                                 width: 200; height: 120
                                 fillMode: Image.PreserveAspectCrop
                             }

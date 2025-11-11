@@ -234,7 +234,7 @@ Item {
                 onClicked: {
                     var json = buildPrescriptionJson()
                     root.saveRequested(json)
-                    PrescriptionBackend.generatePrescriptionPDF(json)
+                    saveDialog.open()
                 }
             }
 
@@ -248,6 +248,15 @@ Item {
     Component.onCompleted: {
         if (medsModel.count === 0)
             medsModel.append({ title: "", dci: "", details: "", qty: 1 })
+    }
+
+    SavePdfDialog {
+        id: saveDialog
+        onFileSelected: function(path) {
+            console.log("PDF sera sauvegardé dans :", path)
+            var json = buildPrescriptionJson()
+            PrescriptionBackend.generatePrescriptionPDF(json, path)
+        }
     }
 
     function loadFromJson(prescriptionJson) {

@@ -76,7 +76,8 @@ Item {
                     text: qsTr("Rechercher")
                     onClicked: {
                         if (root.patientId.trim().length > 0) {
-                            root.patientIdentified(root.buildJson())
+                            PatientBackend.search_patient_by_id(root.buildJson())
+                            root.patientIdentified(patientJson)
                         } else {
                             messageDialog.text = qsTr("Veuillez saisir un identifiant.")
                             messageDialog.open()
@@ -85,92 +86,6 @@ Item {
                 }
             }
         }
-
-        // === OU ===
-        Label {
-            text: qsTr("— OU —")
-            horizontalAlignment: Text.AlignHCenter
-            Layout.alignment: Qt.AlignHCenter
-            color: "#666"
-        }
-
-        // === Bloc de recherche par nom + prénom + date de naissance ===
-        GroupBox {
-            title: qsTr("Recherche par nom, prénom et date de naissance")
-            Layout.fillWidth: true
-
-            GridLayout {
-                columns: 2
-                columnSpacing: 16
-                rowSpacing: 10
-
-                Label { text: qsTr("Nom :") }
-                TextField {
-                    text: root.lastName
-                    onTextChanged: root.lastName = text
-                    placeholderText: qsTr("Ex: Dupont")
-                }
-
-                Label { text: qsTr("Prénom :") }
-                TextField {
-                    text: root.firstName
-                    onTextChanged: root.firstName = text
-                    placeholderText: qsTr("Ex: Marie")
-                }
-
-                Label { text: qsTr("Date de naissance :") }
-                RowLayout {
-                    spacing: 6
-                    TextField {
-                        placeholderText: qsTr("Date (JJ/MM/AAAA)")
-                        text: Qt.formatDate(root.birthDate, "dd/MM/yyyy")
-                        onEditingFinished: {
-                            var parts = text.split("/");
-                            if (parts.length === 3) {
-                                var d = new Date(parts[2], parts[1]-1, parts[0]);
-                                if (!isNaN(d)) root.birthDate = d;
-                            }
-                        }
-                        width: 120
-                    }
-                    Button {
-                        text: "📅"
-                        onClicked: birthDialog.open()
-                    }
-                }
-            }
-        }
-
-        // === Bouton de validation ===
-        Button {
-            text: qsTr("Valider l'identification")
-            Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: 220
-            onClicked: {
-                if ((root.firstName.trim() !== "" && root.lastName.trim() !== "")
-                        || root.patientId.trim() !== "") {
-                    root.patientIdentified(root.buildJson())
-                } else {
-                    messageDialog.text = qsTr("Veuillez renseigner un identifiant ou les informations du patient.")
-                    messageDialog.open()
-                }
-            }
-        }
-    }
-
-    // === Sélecteur de date ===
-    Dialog {
-        id: birthDialog
-        modal: true
-        title: qsTr("Sélectionner la date de naissance")
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        // solve this to have a calendar view
-        //contentItem: CalendarView {
-        //    id: birthCalendar
-        //    selectedDate: root.birthDate
-        //}
-
-        onAccepted: root.birthDate = birthCalendar.selectedDate
     }
 
     // === Message d’erreur ===
@@ -195,4 +110,24 @@ Item {
             stack.push("PrescriptionList.qml")
         }
     }
+
+    Connections {
+        target: backend
+
+        function onPatientFound(patientJson) {
+            var patient = JSON.parse(patientJson)
+            root.firstName = patient.firstName
+            root.lastName = patient.lastName
+            root.birthDate = new Date(patient.birthDate)
+
+            console.log("✅ Patient identifié :", patient.firstName, patient.lastName)
+            root.patientIdentified(patientJson)
+        }
+
+        function onPatientNotFound(patientId) {
+            messageDialog.text = qsTr("Aucun patient trouvé avec l'identifiant : ") + patientId
+            messageDialog.open()
+        }
+    }
+
 }

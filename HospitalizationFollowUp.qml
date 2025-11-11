@@ -189,7 +189,7 @@ Item {
                     text: qsTr("Sauvegarder PDF")
                     onClicked: {
                         var json = root.buildJson()
-                        PrescriptionBackend.generate_followup_report(json)
+                        saveDialog.open()
 
                     }
                 }
@@ -205,6 +205,15 @@ Item {
                     MenuItem { text: "Dossier partagé"; onTriggered: root.shareRequested(root.buildJson(), "sharedRecord") }
                 }
             }
+        }
+    }
+
+    SavePdfDialog {
+        id: saveDialog
+        onFileSelected: function(path) {
+            console.log("PDF sera sauvegardé dans :", path)
+            var json = root.buildJson()
+            PrescriptionBackend.generate_followup_report(json, path)
         }
     }
 

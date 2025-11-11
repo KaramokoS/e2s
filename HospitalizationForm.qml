@@ -316,15 +316,11 @@ Item {
                 Item { Layout.fillWidth: true }
 
                 Button {
-                    text: qsTr("Sauvegarder")
-                    onClicked: root.saveRequested(root.buildJson())
-                }
-                Button {
                     text: qsTr("Sauvegarder PDF")
                     onClicked: {
                         var json = root.buildJson()
                         root.saveRequested(json)
-                        PrescriptionBackend.generate_hospitalization_report(json)
+                        saveDialog.open()
                     }
                 }
                 Button {
@@ -355,6 +351,15 @@ Item {
         modal: true
         title: qsTr("Sélectionner la date de sortie")
         standardButtons: Dialog.Ok | Dialog.Cancel
+    }
+
+    SavePdfDialog {
+        id: saveDialog
+        onFileSelected: function(path) {
+            console.log("PDF sera sauvegardé dans :", path)
+            var json = root.buildJson()
+            PrescriptionBackend.generate_hospitalization_report(json, path)
+        }
     }
 
     // === Charger depuis JSON ===
