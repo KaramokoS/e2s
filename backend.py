@@ -7,7 +7,7 @@ class Backend(QObject):
     patientFound = Signal(str)  # Signal envoyé vers QML si patient trouvé
     patientNotFound = Signal(str)  # Signal si l’ID n’existe pas
 
-    @Slot(str)
+    @Slot(str, result=bool)
     def search_patient_by_id(self, json_str):
         """Recherche un patient à partir de son ID et renvoie les infos JSON"""
         try:
@@ -31,9 +31,11 @@ class Backend(QObject):
                 }
                 print(f"✅ Patient trouvé : {patient}")
                 self.patientFound.emit(json.dumps(patient))
+                return True
             else:
                 print("❌ Aucun patient trouvé pour cet ID.")
                 self.patientNotFound.emit(patient_id)
+                return False
 
         except Exception as e:
             print("Erreur recherche patient :", e)

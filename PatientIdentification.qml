@@ -76,8 +76,10 @@ Item {
                     text: qsTr("Rechercher")
                     onClicked: {
                         if (root.patientId.trim().length > 0) {
-                            PatientBackend.search_patient_by_id(root.buildJson())
-                            root.patientIdentified(patientJson)
+                            if(PatientBackend.search_patient_by_id(root.buildJson())) {
+                                console.log("#######Found###############")
+                                root.patientIdentified(root.buildJson())
+                            }
                         } else {
                             messageDialog.text = qsTr("Veuillez saisir un identifiant.")
                             messageDialog.open()
@@ -111,6 +113,9 @@ Item {
         }
     }
 
+    Component.onCompleted : {
+        console.log("✅ Le comopsant est prêt.")
+    }
     Connections {
         target: backend
 
@@ -129,5 +134,4 @@ Item {
             messageDialog.open()
         }
     }
-
 }
